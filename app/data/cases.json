@@ -1,0 +1,132 @@
+{
+  "cases": [
+    {
+      "id": 1,
+      "name": "Danger Zone Case",
+      "price": 2.49,
+      "image": "case1.png",
+      "skins": [
+        {
+          "name": "M4A4 | The Emperor",
+          "weapon": "M4A4",
+          "skin": "The Emperor",
+          "rarity": "Covert",
+          "price": 350.00,
+          "image": "m4a4_emperor.png"
+        },
+        {
+          "name": "AWP | Mortis",
+          "weapon": "AWP",
+          "skin": "Mortis",
+          "rarity": "Classified",
+          "price": 45.00,
+          "image": "awp_mortis.png"
+        },
+        {
+          "name": "USP-S | Cortex",
+          "weapon": "USP-S",
+          "skin": "Cortex",
+          "rarity": "Restricted",
+          "price": 12.50,
+          "image": "usp_cortex.png"
+        },
+        {
+          "name": "MP9 | Starlight Protector",
+          "weapon": "MP9",
+          "skin": "Starlight Protector",
+          "rarity": "Mil-Spec",
+          "price": 3.20,
+          "image": "mp9_starlight.png"
+        },
+        {
+          "name": "CZ75-Auto | Vendetta",
+          "weapon": "CZ75-Auto",
+          "skin": "Vendetta",
+          "rarity": "Mil-Spec",
+          "price": 2.80,
+          "image": "cz_vendetta.png"
+        },
+        {
+          "name": "AK-47 | Rat Rod",
+          "weapon": "AK-47",
+          "skin": "Rat Rod",
+          "rarity": "Industrial Grade",
+          "price": 1.50,
+          "image": "ak_ratrod.png"
+        },
+        {
+          "name": "Desert Eagle | Mecha Industries",
+          "weapon": "Desert Eagle",
+          "skin": "Mecha Industries",
+          "rarity": "Covert",
+          "price": 42.00,
+          "image": "deagle_mecha.png"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Prisma 2 Case",
+      "price": 2.99,
+      "image": "case2.png",
+      "skins": [
+        {
+          "name": "Butterfly Knife | Fade",
+          "weapon": "Butterfly Knife",
+          "skin": "Fade",
+          "rarity": "Covert",
+          "price": 2500.00,
+          "image": "butterfly_fade.png"
+        },
+        {
+          "name": "AK-47 | Asiimov",
+          "weapon": "AK-47",
+          "skin": "Asiimov",
+          "rarity": "Classified",
+          "price": 180.00,
+          "image": "ak_asii.png"
+        },
+        {
+          "name": "AWP | Neo-Noir",
+          "weapon": "AWP",
+          "skin": "Neo-Noir",
+          "rarity": "Classified",
+          "price": 95.00,
+          "image": "awp_neonoir.png"
+        },
+        {
+          "name": "M4A1-S | Decimator",
+          "weapon": "M4A1-S",
+          "skin": "Decimator",
+          "rarity": "Restricted",
+          "price": 22.00,
+          "image": "m4a1s_deci.png"
+        },
+        {
+          "name": "USP-S | Cortex",
+          "weapon": "USP-S",
+          "skin": "Cortex",
+          "rarity": "Mil-Spec",
+          "price": 8.50,
+          "image": "usp_cortex.png"
+        },
+        {
+          "name": "Glock-18 | Vogue",
+          "weapon": "Glock-18",
+          "skin": "Vogue",
+          "rarity": "Mil-Spec",
+          "price": 6.30,
+          "image": "glock_vogue.png"
+        },
+        {
+          "name": "P250 | Visions",
+          "weapon": "P250",
+          "skin": "Visions",
+          "rarity": "Industrial Grade",
+          "price": 1.20,
+          "image": "p250_visions.png"
+        }
+      ]
+    }
+  ]
+}
