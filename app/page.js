@@ -4,6 +4,11 @@ import { useState, useEffect } from 'react';
 import Image from "next/image";
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import dynamic from 'next/dynamic';
+
+const UpgradeSystem = dynamic(() => import('./components/UpgradeSystem'), {
+  ssr: false,
+});
 
 // Import the cases data
 import casesData from './data/cases.json';
@@ -22,9 +27,9 @@ export default function Home() {
   const [showWonItem, setShowWonItem] = useState(false);
   
   // Calculate total inventory value
-  const totalValue = inventory.reduce((sum, item) => sum + item.price, 0);
+  const totalValue = inventory.reduce((sum, item) => sum + (item?.price || 0), 0);
   // Sort inventory by price (highest first)
-  const sortedInventory = [...inventory].sort((a, b) => b.price - a.price);
+  const sortedInventory = [...inventory].sort((a, b) => (b?.price || 0) - (a?.price || 0));
   // Get top 3 most expensive items
   const featuredItems = sortedInventory.slice(0, 3);
   
@@ -41,6 +46,33 @@ export default function Home() {
     const newBalance = balance + amount;
     updateBalance(newBalance);
     return newBalance;
+  };
+
+  // Handle item upgrade
+  const handleUpgrade = (oldItem, newItem) => {
+    setInventory(prev => {
+      // Remove the old item
+      const newInventory = prev.filter(item => item.id !== oldItem.id);
+      // Add the upgraded item
+      newInventory.push({ ...newItem, id: Date.now() });
+      
+      // Update localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('userInventory', JSON.stringify(newInventory));
+      }
+      
+      return newInventory;
+    });
+  };
+  
+  // Add balance with prompt
+  const addBalance = () => {
+    const amount = parseFloat(prompt('Enter amount to add (max $1000):', '10'));
+    if (amount && !isNaN(amount) && amount > 0 && amount <= 1000) {
+      addToBalance(amount);
+    } else if (amount && (amount <= 0 || amount > 1000)) {
+      alert('Please enter a valid amount between $0.01 and $1000');
+    }
   };
   
   // Subtract amount from balance
@@ -66,6 +98,7 @@ export default function Home() {
 
   // Format price with commas
   const formatPrice = (price) => {
+    if (typeof price !== 'number') return '0.00';
     return price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
 
@@ -92,6 +125,20 @@ export default function Home() {
     
     // Close dialog
     setShowSellDialog(null);
+  };
+
+  // Close won item modal
+  const closeWonItem = () => {
+    setShowWonItem(false);
+    setWonItem(null);
+  };
+
+  // Sell won item
+  const sellWonItem = () => {
+    if (!wonItem) return;
+    addToBalance(wonItem.price || 0);
+    setShowWonItem(false);
+    setWonItem(null);
   };
 
   // Open a case
@@ -135,7 +182,7 @@ export default function Home() {
     
     // Select random item
     const selectedIndex = Math.floor(Math.random() * weightedItems.length);
-    const selectedItem = { ...weightedItems[selectedIndex] };
+    const selectedItem = { ...weightedItems[selectedIndex], id: Date.now() };
     
     // Set the won item and show animation
     setWonItem(selectedItem);
@@ -152,6 +199,8 @@ export default function Home() {
 
   // Add item to inventory
   const addToInventory = (item) => {
+    if (!item) return;
+    
     setInventory(prev => {
       const newInventory = [...prev, item];
       if (typeof window !== 'undefined') {
@@ -168,14 +217,21 @@ export default function Home() {
       const savedBalance = localStorage.getItem('userBalance');
       if (savedBalance === null) {
         // First time - set to $500
-        updateBalance(500);se      } else {
-        setBalance(parseFloat(savedBalance));
+        updateBalance(500);
+      } else {
+        setBalance(parseFloat(savedBalance) || 0);
       }
       
       // Initialize inventory
       const savedInventory = localStorage.getItem('userInventory');
       if (savedInventory) {
-        setInventory(JSON.parse(savedInventory));
+        try {
+          const parsed = JSON.parse(savedInventory);
+          setInventory(Array.isArray(parsed) ? parsed : []);
+        } catch (e) {
+          console.error('Error parsing inventory:', e);
+          setInventory([]);
+        }
       }
       
       setIsInitialized(true);
@@ -184,7 +240,9 @@ export default function Home() {
 
   // Load cases from JSON file on component mount
   useEffect(() => {
-    setCases(casesData.cases);
+    if (casesData?.cases) {
+      setCases(casesData.cases);
+    }
   }, []);
 
   return (
@@ -210,162 +268,87 @@ export default function Home() {
               Deposit
             </button>
             <div className="relative">
-              <button 
-                onClick={() => setShowProfile(!showProfile)}
-                className="flex items-center space-x-2 bg-gray-800/50 hover:bg-gray-700/70 px-3 py-2 rounded-md transition-colors"
-              >
-                <div className="text-right">
-                  <div>
-                    <p className="text-sm font-medium">Player</p>
-                    <div className="flex items-center space-x-1">
-                      <span className="text-xs text-yellow-400">${formatPrice(balance)}</span>
-                      <span className="text-xs text-gray-400">•</span>
-                      <span className="text-xs text-gray-400">${formatPrice(totalValue)} in items</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center text-white font-bold">
-                  <span>P</span>
-                </div>
-              </button>
-              
-              {showProfile && (
-                <div className="absolute right-0 mt-2 w-80 bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-50 overflow-hidden">
-                  {/* Profile Header */}
-                  <div className="bg-gradient-to-r from-gray-800 to-gray-900 p-4 border-b border-gray-700">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center text-2xl text-white font-bold">
-                        P
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg">Player</h3>
-                        <p className="text-yellow-400 text-sm">${totalValue.toFixed(2)}</p>
-                        <div className="flex space-x-2 mt-1">
-                          <span className="text-xs bg-gray-700/50 text-gray-300 px-2 py-0.5 rounded">
-                            {inventory.length} items
-                          </span>
-                          <span className="text-xs bg-blue-900/50 text-blue-300 px-2 py-0.5 rounded">
-                            Level 1
-                          </span>
-                        </div>
+              <div className="relative">
+                <button 
+                  onClick={() => setShowProfile(!showProfile)}
+                  className="flex items-center space-x-2 bg-gray-800/50 hover:bg-gray-700/70 px-3 py-2 rounded-md transition-colors"
+                >
+                  <div className="text-right">
+                    <div>
+                      <p className="text-sm font-medium">Player</p>
+                      <div className="flex items-center space-x-1">
+                        <span className="text-xs text-yellow-400">${formatPrice(balance)}</span>
+                        <span className="text-xs text-gray-400">•</span>
+                        <span className="text-xs text-gray-400">${formatPrice(totalValue)} in items</span>
                       </div>
                     </div>
                   </div>
-                  
-                  {/* Tabs */}
-                  <div className="flex border-b border-gray-700">
-                    <button 
-                      onClick={() => setActiveTab('inventory')}
-                      className={`flex-1 py-3 text-sm font-medium ${activeTab === 'inventory' ? 'text-yellow-400 border-b-2 border-yellow-400' : 'text-gray-400 hover:text-white'}`}
-                    >
-                      Inventory
-                    </button>
-                    <button 
-                      onClick={() => setActiveTab('stats')}
-                      className={`flex-1 py-3 text-sm font-medium ${activeTab === 'stats' ? 'text-yellow-400 border-b-2 border-yellow-400' : 'text-gray-400 hover:text-white'}`}
-                    >
-                      Stats
-                    </button>
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center text-white font-bold">
+                    <span>P</span>
                   </div>
-                  
-                  {/* Tab Content */}
-                  <div className="max-h-96 overflow-y-auto">
-                    {activeTab === 'inventory' ? (
-                      <div>
-                        {inventory.length > 0 ? (
-                          <div className="divide-y divide-gray-700">
-                            {inventory.map((item) => (
-                              <div key={item.id} className="flex items-center p-3 hover:bg-gray-800/50 transition-colors">
-                                <div className={`w-12 h-12 ${item.isKnife ? 'bg-gradient-to-br from-amber-500 to-amber-700' : 'bg-gray-700/50'} rounded flex items-center justify-center mr-3`}>
-                                  <span className="text-2xl">{item.isKnife ? '🔪' : '🔫'}</span>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex justify-between items-start">
-                                    <div>
-                                      <p className="text-sm font-medium truncate">{item.weapon}</p>
-                                      <p className="text-xs text-gray-300 truncate">{item.skin}</p>
-                                    </div>
-                                    <button 
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleSellItem(item);
-                                      }}
-                                      className="ml-2 px-2 py-1 bg-red-600/50 hover:bg-red-600/70 text-white text-xs rounded transition-colors"
-                                    >
-                                      Sell
-                                    </button>
-                                  </div>
-                                  <div className="flex items-center justify-between mt-1">
-                                    <span className={`text-xs px-1.5 py-0.5 rounded ${
-                                      item.rarity === 'Covert' ? 'bg-red-900/50 text-red-300' :
-                                      item.rarity === 'Classified' ? 'bg-purple-900/50 text-purple-300' :
-                                      item.rarity === 'Rare Special' ? 'bg-amber-900/50 text-amber-300' :
-                                      'bg-gray-700/50 text-gray-300'
-                                    }`}>
-                                      {item.rarity}
-                                    </span>
-                                    <span className="text-xs font-medium text-yellow-400">${formatPrice(item.price)}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="p-6 text-center">
-                            <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-3">
-                              <span className="text-2xl">📦</span>
-                            </div>
-                            <h4 className="font-medium mb-1">Your inventory is empty</h4>
-                            <p className="text-sm text-gray-400 mb-4">Open cases to get items</p>
-                            <button className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-md text-sm font-medium">
-                              Open Cases
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="p-4">
-                        <h4 className="font-medium mb-3">Your Stats</h4>
-                        <div className="space-y-3">
-                          <div>
-                            <div className="flex justify-between text-sm mb-1">
-                              <span className="text-gray-400">Total Value</span>
-                              <span className="font-medium">${formatPrice(balance)}</span>
-                            </div>
-                            <div className="h-1 bg-gray-700 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-yellow-500" 
-                                style={{ width: `${Math.min(100, (totalValue / 10000) * 100)}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div className="bg-gray-800/50 p-3 rounded">
-                              <p className="text-gray-400">Items Owned</p>
-                              <p className="text-lg font-bold">{inventory.length}</p>
-                            </div>
-                            <div className="bg-gray-800/50 p-3 rounded">
-                              <p className="text-gray-400">Most Valuable</p>
-                              <p className="text-sm font-medium truncate">
-                                {inventory.length > 0 ? inventory[0].name : 'None'}
-                              </p>
-                            </div>
-                          </div>
+                </button>
+                
+                {showProfile && (
+                  <div className="absolute right-0 mt-2 w-80 bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-50 overflow-hidden">
+                    <div className="bg-gradient-to-r from-gray-800 to-gray-900 p-4 border-b border-gray-700">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center text-2xl text-white font-bold">
+                          P
+                        </div>
+                        <div>
+                          <h3 className="font-medium">Player Profile</h3>
+                          <p className="text-sm text-gray-300">Balance: ${formatPrice(balance)}</p>
                         </div>
                       </div>
-                    )}
+                    </div>
+                    <div className="p-4">
+                      <button 
+                        onClick={addBalance}
+                        className="w-full py-2 bg-yellow-600 hover:bg-yellow-700 rounded-md mb-2 font-medium"
+                      >
+                        Add Funds
+                      </button>
+                      <button 
+                        onClick={() => setShowProfile(false)}
+                        className="w-full py-2 bg-gray-700 hover:bg-gray-600 rounded-md font-medium"
+                      >
+                        Close
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Cases Section */}
-        <section>
-          <h2 className="text-2xl font-bold mb-6">Available Cases</h2>
+        {/* Tabs */}
+        <div className="flex border-b border-gray-700 mb-8">
+          <button
+            className={`px-6 py-3 font-medium ${activeTab === 'cases' ? 'text-yellow-400 border-b-2 border-yellow-400' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => setActiveTab('cases')}
+          >
+            Cases
+          </button>
+          <button
+            className={`px-6 py-3 font-medium ${activeTab === 'inventory' ? 'text-yellow-400 border-b-2 border-yellow-400' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => setActiveTab('inventory')}
+          >
+            Inventory
+          </button>
+          <button
+            className={`px-6 py-3 font-medium ${activeTab === 'upgrade' ? 'text-yellow-400 border-b-2 border-yellow-400' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => setActiveTab('upgrade')}
+          >
+            Upgrade
+          </button>
+        </div>
+
+        {activeTab === 'cases' && (
+          <section>
+            <h2 className="text-2xl font-bold mb-6">Available Cases</h2>
             {/* Cases Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {cases.map((caseItem) => (
@@ -413,7 +396,64 @@ export default function Home() {
                 </motion.div>
               ))}
             </div>
-        </section>
+          </section>
+        )}
+
+        {activeTab === 'inventory' && (
+          <section>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Your Inventory</h2>
+              <div className="text-yellow-400 font-medium">
+                Total Value: ${formatPrice(totalValue)}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {sortedInventory.length > 0 ? (
+                sortedInventory.map((item) => (
+                  <div 
+                    key={item.id} 
+                    className="bg-gray-800/50 rounded-lg overflow-hidden border border-gray-700 hover:border-yellow-500 transition-colors"
+                  >
+                    <div className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className={`font-medium ${getRarityColor(item.rarity)}`}>
+                          {item.name}
+                        </h3>
+                        <span className="text-yellow-400">${formatPrice(item.price)}</span>
+                      </div>
+                      <div className="flex justify-between items-center mt-4">
+                        <button 
+                          onClick={() => handleSellItem(item)}
+                          className="text-xs bg-red-600 hover:bg-red-700 px-3 py-1 rounded"
+                        >
+                          Sell
+                        </button>
+                        <span className="text-xs text-gray-400">{item.rarity}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-8 text-gray-400">
+                  Your inventory is empty. Open some cases to get items!
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {activeTab === 'upgrade' && (
+          <section>
+            <div className="bg-gray-900/50 rounded-xl p-6">
+              <h2 className="text-2xl font-bold mb-6">Upgrade System</h2>
+              <UpgradeSystem 
+                inventory={inventory} 
+                onUpgrade={handleUpgrade} 
+                balance={balance}
+              />
+            </div>
+          </section>
+        )}
       </main>
 
       {/* Won Item Modal */}

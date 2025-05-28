@@ -94,32 +94,67 @@ export default function CasePage({ params: paramsPromise }) {
     setOpening(true);
     setShowResult(false);
     
-    // Simulate spinning animation
-    const spinDuration = 3000; // 3 seconds of spinning
-    const startTime = Date.now();
+    // Reset scroll position
+    const container = document.getElementById('items-container');
+    if (container) {
+      container.scrollLeft = 0;
+    }
     
-    const spin = setInterval(() => {
-      // Scroll through items for animation effect
-      const container = document.getElementById('items-container');
-      if (container) {
-        container.scrollLeft = (container.scrollLeft + 5) % container.scrollWidth;
-      }
+    // Simulate spinning animation with easing
+    const spinDuration = 4000; // 4 seconds of spinning (increased for better effect)
+    const startTime = Date.now();
+    let lastTime = startTime;
+    let scrollSpeed = 5;
+    let maxSpeed = 30;
+    
+    const spin = () => {
+      const now = Date.now();
+      const elapsed = now - startTime;
+      const delta = now - lastTime;
+      lastTime = now;
       
-      // Stop spinning after duration
-      if (Date.now() - startTime > spinDuration) {
-        clearInterval(spin);
+      if (elapsed < spinDuration) {
+        // Ease-in-out effect
+        const progress = elapsed / spinDuration;
+        const easeProgress = progress < 0.5 
+          ? 2 * progress * progress 
+          : 1 - Math.pow(-2 * progress + 2, 2) / 2;
         
+        // Gradually increase then decrease speed
+        if (progress < 0.8) {
+          scrollSpeed = 5 + (maxSpeed - 5) * easeProgress / 0.8;
+        } else {
+          scrollSpeed = maxSpeed * (1 - (progress - 0.8) / 0.2);
+        }
+        
+        // Scroll through items
+        if (container) {
+          container.scrollLeft = (container.scrollLeft + scrollSpeed) % container.scrollWidth;
+        }
+        
+        requestAnimationFrame(spin);
+      } else {
         // Select random item (weighted by rarity)
         const randomIndex = Math.floor(Math.random() * items.length);
         const selected = items[randomIndex];
         
-        // Show result
-        setWonItem(selected);
-        setShowResult(true);
-        setOpening(false);
+        // Scroll to the selected item
+        if (container) {
+          const itemWidth = 96; // 6rem = 96px (w-24)
+          const targetScroll = randomIndex * itemWidth - (container.clientWidth / 2) + (itemWidth / 2);
+          container.scrollTo({
+            left: targetScroll,
+            behavior: 'smooth'
+          });
+        }
         
-        // Add to inventory
+        // Show result with a slight delay
         setTimeout(() => {
+          setWonItem(selected);
+          setShowResult(true);
+          setOpening(false);
+          
+          // Add to inventory
           const inventory = JSON.parse(localStorage.getItem('userInventory') || '[]');
           inventory.push({ ...selected, id: Date.now() });
           localStorage.setItem('userInventory', JSON.stringify(inventory));
@@ -127,9 +162,12 @@ export default function CasePage({ params: paramsPromise }) {
           // Update balance
           const balance = parseFloat(localStorage.getItem('userBalance') || '0');
           localStorage.setItem('userBalance', (balance - caseData.price).toString());
-        }, 500);
+        }, 1000);
       }
-    }, 20);
+    };
+    
+    // Start the animation
+    requestAnimationFrame(spin);
   };
 
   if (isLoading) {
@@ -240,25 +278,44 @@ export default function CasePage({ params: paramsPromise }) {
                   {opening ? 'Spinning...' : 'Possible Drops'}
                 </h2>
                 
-                <div 
-                  id="items-container"
-                  className="flex space-x-4 overflow-x-auto py-4 px-2 mb-4 scrollbar-hide"
-                  style={{ scrollBehavior: opening ? 'auto' : 'smooth' }}
-                >
-                  {items.map((item, index) => (
-                    <div 
-                      key={`${item.id}-${index}`}
-                      className={`flex-shrink-0 w-24 h-24 rounded border ${
-                        wonItem?.name === item.name && showResult 
-                          ? 'border-yellow-500 ring-2 ring-yellow-500/50' 
-                          : 'border-gray-600'
-                      } ${getRarityColor(item.rarity).replace('text', 'bg').replace('400', '900/50')} p-2`}
-                    >
-                      <div className="w-full h-full flex items-center justify-center text-2xl">
-                        {item.isKnife ? '🔪' : '🔫'}
-                      </div>
-                    </div>
-                  ))}
+                <div className="relative h-32 w-full overflow-hidden rounded-lg bg-gray-800/50 p-2">
+                  <div 
+                    id="items-container"
+                    className="flex h-full space-x-4 overflow-x-auto scrollbar-hide"
+                    style={{ scrollBehavior: opening ? 'auto' : 'smooth' }}
+                  >
+                    {items.map((item, index) => (
+                      <motion.div 
+                        key={`${item.id}-${index}`}
+                        className={`flex-shrink-0 w-24 h-full rounded-md border-2 flex flex-col items-center justify-center ${
+                          wonItem?.name === item.name && showResult 
+                            ? 'border-yellow-400 shadow-lg shadow-yellow-500/30 scale-110 z-10' 
+                            : 'border-transparent'
+                        } ${getRarityColor(item.rarity).replace('text', 'bg').replace('400', '900/50')} p-2 transition-all duration-300`}
+                        initial={{ opacity: 0.8, y: 10 }}
+                        animate={{ 
+                          opacity: wonItem?.name === item.name && showResult ? 1 : 0.8,
+                          y: wonItem?.name === item.name && showResult ? 0 : 10,
+                          scale: wonItem?.name === item.name && showResult ? 1.1 : 1
+                        }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <div className="text-3xl mb-1">
+                          {item.weapon === 'Knife' ? '🔪' : '🔫'}
+                        </div>
+                        <div className="text-xs text-center font-medium truncate w-full">
+                          {item.weapon}
+                        </div>
+                        <div className="text-xs text-gray-300 truncate w-full text-center">
+                          {item.skin}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                  
+                  {/* Gradient overlays for better visual effect */}
+                  <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-gray-900 to-transparent pointer-events-none"></div>
+                  <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-gray-900 to-transparent pointer-events-none"></div>
                 </div>
                 
                 {!opening && (
