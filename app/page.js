@@ -25,6 +25,7 @@ export default function Home() {
   const [openingCase, setOpeningCase] = useState(null);
   const [wonItem, setWonItem] = useState(null);
   const [showWonItem, setShowWonItem] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
   
   // Calculate total inventory value
   const totalValue = inventory.reduce((sum, item) => sum + (item?.price || 0), 0);
@@ -51,10 +52,13 @@ export default function Home() {
   // Handle item upgrade
   const handleUpgrade = (oldItem, newItem) => {
     setInventory(prev => {
-      // Remove the old item
-      const newInventory = prev.filter(item => item.id !== oldItem.id);
-      // Add the upgraded item
-      newInventory.push({ ...newItem, id: Date.now() });
+      // First, remove the old item
+      let newInventory = prev.filter(item => item.id !== oldItem.id);
+      
+      // Only add the new item if the upgrade was successful (newItem is not null)
+      if (newItem) {
+        newInventory = [...newInventory, { ...newItem, id: Date.now() }];
+      }
       
       // Update localStorage
       if (typeof window !== 'undefined') {
@@ -93,6 +97,74 @@ export default function Home() {
       case 'Consumer Grade': return 'text-gray-400';
       case 'Rare Special': return 'text-yellow-400';
       default: return 'text-gray-300';
+    }
+  };
+
+  // Calculate upgrade chance based on item rarity
+  const calculateUpgradeChance = (rarity) => {
+    const rarityChances = {
+      'Consumer Grade': 80,
+      'Industrial Grade': 65,
+      'Mil-Spec': 50,
+      'Restricted': 35,
+      'Classified': 20,
+      'Covert': 10,
+      'Rare Special': 5
+    };
+    return rarityChances[rarity] || 50; // Default to 50% if rarity not found
+  };
+
+  // Handle upgrade button click
+  const handleUpgradeClick = (item) => {
+    const chance = calculateUpgradeChance(item.rarity);
+    const isSuccess = Math.random() * 100 < chance;
+    
+    if (isSuccess) {
+      // Get next rarity
+      const rarityOrder = [
+        'Consumer Grade',
+        'Industrial Grade',
+        'Mil-Spec',
+        'Restricted',
+        'Classified',
+        'Covert',
+        'Rare Special'
+      ];
+      
+      const currentIndex = rarityOrder.indexOf(item.rarity);
+      if (currentIndex < rarityOrder.length - 1) {
+        const newRarity = rarityOrder[currentIndex + 1];
+        const newPrice = Math.floor(item.price * 2.5); // Increase price for upgraded item
+        
+        // Create upgraded item
+        const upgradedItem = {
+          ...item,
+          rarity: newRarity,
+          price: newPrice,
+          upgradedFrom: item.rarity,
+          upgradedAt: new Date().toISOString()
+        };
+        
+        // Handle the upgrade
+        handleUpgrade(item, upgradedItem);
+        
+        // Show success message
+        alert(`Upgrade successful! Your ${item.name} is now ${newRarity} quality!`);
+      } else {
+        alert('This item is already at the highest rarity!');
+      }
+    } else {
+      // Remove the item on failed upgrade
+      setInventory(prev => {
+        const newInventory = prev.filter(i => i.id !== item.id);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('userInventory', JSON.stringify(newInventory));
+        }
+        return newInventory;
+      });
+      
+      // Show failure message
+      alert(`Upgrade failed! The ${item.name} was destroyed in the process.`);
     }
   };
 
@@ -175,25 +247,6 @@ export default function Home() {
     const weightedItems = [];
     items.forEach(item => {
       const weight = rarityWeights[item.rarity] || 100;
-      for (let i = 0; i < weight; i++) {
-        weightedItems.push(item);
-      }
-    });
-    
-    // Select random item
-    const selectedIndex = Math.floor(Math.random() * weightedItems.length);
-    const selectedItem = { ...weightedItems[selectedIndex], id: Date.now() };
-    
-    // Set the won item and show animation
-    setWonItem(selectedItem);
-    setShowWonItem(true);
-    
-    // Add to inventory
-    addToInventory(selectedItem);
-    
-    // Reset opening state after animation
-    setTimeout(() => {
-      setOpeningCase(null);
     }, 1000);
   };
 
@@ -412,7 +465,8 @@ export default function Home() {
                 sortedInventory.map((item) => (
                   <div 
                     key={item.id} 
-                    className="bg-gray-800/50 rounded-lg overflow-hidden border border-gray-700 hover:border-yellow-500 transition-colors"
+                    onClick={() => setSelectedItem(item)}
+                    className="bg-gray-800/50 rounded-lg overflow-hidden border border-gray-700 hover:border-yellow-500 transition-colors cursor-pointer"
                   >
                     <div className="p-4">
                       <div className="flex items-center justify-between mb-2">
@@ -422,12 +476,33 @@ export default function Home() {
                         <span className="text-yellow-400">${formatPrice(item.price)}</span>
                       </div>
                       <div className="flex justify-between items-center mt-4">
-                        <button 
-                          onClick={() => handleSellItem(item)}
-                          className="text-xs bg-red-600 hover:bg-red-700 px-3 py-1 rounded"
-                        >
-                          Sell
-                        </button>
+                        <div className="flex space-x-2">
+                          <button 
+                            onClick={() => handleSellItem(item)}
+                            className="text-xs bg-red-600 hover:bg-red-700 px-3 py-1 rounded"
+                          >
+                            Sell
+                          </button>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveTab('upgrade');
+                              setSelectedItem(item);
+                            }}
+                            className="relative text-xs bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded overflow-hidden group text-white no-underline"
+                          >
+                            <span className="relative z-10">Upgrade</span>
+                            <div 
+                              className="absolute inset-0 bg-yellow-500/30 transition-all duration-500 ease-out"
+                              style={{
+                                width: `${calculateUpgradeChance(item.rarity)}%`,
+                                transitionProperty: 'width',
+                                transitionDuration: '1s',
+                                transitionTimingFunction: 'ease-out'
+                              }}
+                            />
+                          </button>
+                        </div>
                         <span className="text-xs text-gray-400">{item.rarity}</span>
                       </div>
                     </div>

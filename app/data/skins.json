@@ -1,0 +1,238 @@
+{
+  "skins": [
+    {
+      "id": 1,
+      "name": "Glock-18 | Sand Dune",
+      "weapon": "Glock-18",
+      "skin": "Sand Dune",
+      "rarity": "Consumer Grade",
+      "price": 0.10,
+      "image": "glock_sand_dune.png"
+    },
+    {
+      "id": 2,
+      "name": "USP-S | Forest Leaves",
+      "weapon": "USP-S",
+      "skin": "Forest Leaves",
+      "rarity": "Consumer Grade",
+      "price": 0.15,
+      "image": "usp_forest_leaves.png"
+    },
+    {
+      "id": 3,
+      "name": "P250 | Sand Dune",
+      "weapon": "P250",
+      "skin": "Sand Dune",
+      "rarity": "Consumer Grade",
+      "price": 0.12,
+      "image": "p250_sand_dune.png"
+    },
+    {
+      "id": 4,
+      "name": "Five-SeveN | Forest Night",
+      "weapon": "Five-SeveN",
+      "skin": "Forest Night",
+      "rarity": "Consumer Grade",
+      "price": 0.18,
+      "image": "fiveseven_forest_night.png"
+    },
+    {
+      "id": 5,
+      "name": "Tec-9 | Groundwater",
+      "weapon": "Tec-9",
+      "skin": "Groundwater",
+      "rarity": "Consumer Grade",
+      "price": 0.09,
+      "image": "tec9_groundwater.png"
+    },
+    {
+      "id": 6,
+      "name": "P2000 | Granite Marbleized",
+      "weapon": "P2000",
+      "skin": "Granite Marbleized",
+      "rarity": "Consumer Grade",
+      "price": 0.14,
+      "image": "p2000_granite.png"
+    },
+    {
+      "id": 7,
+      "name": "Dual Berettas | Colony",
+      "weapon": "Dual Berettas",
+      "skin": "Colony",
+      "rarity": "Consumer Grade",
+      "price": 0.11,
+      "image": "dual_colony.png"
+    },
+    {
+      "id": 8,
+      "name": "Desert Eagle | Night",
+      "weapon": "Desert Eagle",
+      "skin": "Night",
+      "rarity": "Consumer Grade",
+      "price": 0.20,
+      "image": "deagle_night.png"
+    },
+    {
+      "id": 9,
+      "name": "CZ75-Auto | Army Sheen",
+      "weapon": "CZ75-Auto",
+      "skin": "Army Sheen",
+      "rarity": "Consumer Grade",
+      "price": 0.13,
+      "image": "cz_army_sheen.png"
+    },
+    {
+      "id": 10,
+      "name": "P90 | Sand Spray",
+      "weapon": "P90",
+      "skin": "Sand Spray",
+      "rarity": "Consumer Grade",
+      "price": 0.16,
+      "image": "p90_sand_spray.png"
+    },
+    {
+      "id": 11,
+      "name": "AK-47 | Elite Build",
+      "weapon": "AK-47",
+      "skin": "Elite Build",
+      "rarity": "Industrial Grade",
+      "price": 5.50,
+      "image": "ak47_elite_build.png"
+    },
+    {
+      "id": 12,
+      "name": "M4A4 | Dragon King",
+      "weapon": "M4A4",
+      "skin": "Dragon King",
+      "rarity": "Industrial Grade",
+      "price": 6.20,
+      "image": "m4a4_dragon_king.png"
+    },
+    {
+      "id": 13,
+      "name": "AWP | Worm God",
+      "weapon": "AWP",
+      "skin": "Worm God",
+      "rarity": "Industrial Grade",
+      "price": 8.75,
+      "image": "awp_worm_god.png"
+    },
+    {
+      "id": 14,
+      "name": "M4A1-S | Basilisk",
+      "weapon": "M4A1-S",
+      "skin": "Basilisk",
+      "rarity": "Industrial Grade",
+      "price": 5.90,
+      "image": "m4a1s_basilisk.png"
+    },
+    {
+      "id": 15,
+      "name": "AWP | Phobos",
+      "weapon": "AWP",
+      "skin": "Phobos",
+      "rarity": "Industrial Grade",
+      "price": 7.80,
+      "image": "awp_phobos.png"
+    },
+    {
+      "id": 31,
+      "name": "AK-47 | Redline",
+      "weapon": "AK-47",
+      "skin": "Redline",
+      "rarity": "Mil-Spec",
+      "price": 12.50,
+      "image": "ak47_redline.png"
+    },
+    {
+      "id": 32,
+      "name": "M4A4 | Desolate Space",
+      "weapon": "M4A4",
+      "skin": "Desolate Space",
+      "rarity": "Mil-Spec",
+      "price": 15.75,
+      "image": "m4a4_desolate_space.png"
+    },
+    {
+      "id": 33,
+      "name": "AWP | Redline",
+      "weapon": "AWP",
+      "skin": "Redline",
+      "rarity": "Mil-Spec",
+      "price": 18.20,
+      "image": "awp_redline.png"
+    },
+    {
+      "id": 71,
+      "name": "AK-47 | Vulcan",
+      "weapon": "AK-47",
+      "skin": "Vulcan",
+      "rarity": "Restricted",
+      "price": 65.00,
+      "image": "ak47_vulcan.png"
+    },
+    {
+      "id": 72,
+      "name": "M4A4 | Howl",
+      "weapon": "M4A4",
+      "skin": "Howl",
+      "rarity": "Restricted",
+      "price": 80.00,
+      "image": "m4a4_howl.png"
+    },
+    {
+      "id": 111,
+      "name": "AK-47 | Fire Serpent",
+      "weapon": "AK-47",
+      "skin": "Fire Serpent",
+      "rarity": "Classified",
+      "price": 250.00,
+      "image": "ak47_fire_serpent.png"
+    },
+    {
+      "id": 112,
+      "name": "AWP | Dragon Lore",
+      "weapon": "AWP",
+      "skin": "Dragon Lore",
+      "rarity": "Classified",
+      "price": 300.00,
+      "image": "awp_dragon_lore.png"
+    },
+    {
+      "id": 151,
+      "name": "AK-47 | Bloodsport",
+      "weapon": "AK-47",
+      "skin": "Bloodsport",
+      "rarity": "Covert",
+      "price": 450.00,
+      "image": "ak47_bloodsport.png"
+    },
+    {
+      "id": 152,
+      "name": "M4A4 | The Emperor",
+      "weapon": "M4A4",
+      "skin": "The Emperor",
+      "rarity": "Covert",
+      "price": 500.00,
+      "image": "m4a4_emperor.png"
+    },
+    {
+      "id": 181,
+      "name": "★ Karambit | Fade",
+      "weapon": "★ Karambit",
+      "skin": "Fade",
+      "rarity": "Rare Special Item",
+      "price": 1200.00,
+      "image": "karambit_fade.png"
+    },
+    {
+      "id": 182,
+      "name": "★ M9 Bayonet | Doppler",
+      "weapon": "★ M9 Bayonet",
+      "skin": "Doppler",
+      "rarity": "Rare Special Item",
+      "price": 1500.00,
+      "image": "m9_doppler.png"
+    }
+  ]
+}
